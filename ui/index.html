@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hello Pinghe! Launcher</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar">
+    <div class="logo" id="logo" title="回到首页"><span class="logo-mark"><img src="logo.png" alt="Hello Pinghe!"></span><div><b>Hello Pinghe! Launcher</b><small>平和 · 本地学习助手</small></div></div>
+    <nav id="nav">
+      <button data-go="home" class="active">🏠 首页</button>
+      <button data-go="timetable">📅 我的课表</button>
+      <button data-go="schedule">🗓️ 我的日程</button>
+      <button data-go="gradett">📊 班级课表</button>
+      <button data-go="courses">📚 我的课程</button>
+      <button data-go="mail">✉️ 平和邮箱</button>
+      <button data-go="agent">🤖 Agent 助手</button>
+      <button data-go="settings">⚙️ 设置</button>
+    </nav>
+    <div class="side-foot">本地运行 · 数据不出机器</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar"><h1 id="view-title">首页</h1><div class="top-actions"><button id="btn-refresh" class="ghost">↻ 刷新</button></div></div>
+
+    <!-- ================= 首页 ================= -->
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <div class="card clock-card">
+          <div id="home-clock" class="big-clock">--:--:--</div>
+          <div id="home-date" class="muted">加载中…</div>
+        </div>
+        <div class="hero-duo">
+          <div class="card current-card go-card" data-go="timetable" title="查看我的课表">
+            <div class="card-title">正在上的课</div>
+            <div id="home-current" class="current-lesson">—</div>
+          </div>
+          <div class="card next-card go-card" data-go="timetable" title="查看我的课表">
+            <div class="card-title">下一节课</div>
+            <div id="home-next" class="current-lesson">—</div>
+          </div>
+        </div>
+        <div class="card stat-card go-card" data-go="mail" title="打开平和邮箱">
+          <div class="card-title">未读邮件</div>
+          <div id="home-unread" class="big-num">–</div>
+          <div class="muted small">平和邮箱</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card go-card" data-go="timetable" title="查看我的课表"><div class="card-title">今天的课</div><div id="home-lessons" class="list"></div></div>
+        <div class="card go-card" data-go="schedule" title="查看我的日程"><div class="card-title">今天的日程</div><div id="home-events" class="list"></div></div>
+      </div>
+      <div class="card go-card" data-go="courses" title="打开我的课程"><div class="card-title">ManageBac · 未来 14 天 DDL</div><div id="home-ddl" class="list"></div></div>
+    </section>
+
+    <!-- ================= 我的课表 ================= -->
+    <section class="view" id="view-timetable">
+      <div class="row-tools">
+        <button class="ghost" id="tt-prev">‹ 上一周</button>
+        <button class="ghost" id="tt-this">本周</button>
+        <button class="ghost" id="tt-next">下一周 ›</button>
+        <span id="tt-range" class="muted"></span>
+        <span id="tt-wait" hidden>加载中…</span>
+      </div>
+      <div id="tt-week" class="tt-grid"></div>
+    </section>
+
+    <!-- ================= 我的日程 ================= -->
+    <section class="view" id="view-schedule">
+      <div class="row-tools">
+        <button class="ghost" id="sch-prev">‹</button>
+        <b id="sch-label"></b>
+        <button class="ghost" id="sch-next">›</button>
+        <button class="ghost" id="sch-today">今天</button>
+        <span class="flex1"></span>
+        <div class="chip-wrap" id="sch-views">
+          <span class="chip" data-v="week">周</span>
+          <span class="chip on" data-v="month">月</span>
+          <span class="chip" data-v="year">年</span>
+        </div>
+        <button id="sch-add-btn" class="primary">＋ 新建日程</button>
+      </div>
+      <div id="sch-week" class="sch-week hidden"></div>
+      <div id="sch-month" class="cal"></div>
+      <div id="sch-year" class="cal-year hidden"></div>
+    </section>
+
+    <!-- ================= 班级课表 ================= -->
+    <section class="view" id="view-gradett">
+      <div class="row-tools">
+        <button class="ghost" id="gt-prev">‹ 前一天</button>
+        <b id="gt-day-label"></b>
+        <button class="ghost" id="gt-next">后一天 ›</button>
+        <button class="ghost" id="gt-today">今天</button>
+        <input type="text" id="gt-filter" class="flex1" placeholder="筛选科目 / 老师 / 教室 / 班级…">
+        <span id="gt-meta" class="muted"></span>
+      </div>
+      <div id="gt-body" class="card"><div class="empty">选择日期查询</div></div>
+    </section>
+
+    <!-- ================= 我的课程 ================= -->
+    <section class="view" id="view-courses">
+      <div class="row-tools">
+        <b>我的课程</b><span class="muted small">点课程/作业看详情 · ▲▼ 调顺序</span>
+        <span class="flex1"></span>
+        <button class="ghost" id="co-refresh">↻ 同步 ManageBac</button>
+      </div>
+      <div class="grid-2 co-core">
+        <div class="card core-card" data-core="cas">
+          <div class="card-title">🎨 CAS 创意 · 行动 · 服务</div>
+          <div class="muted small">IB Core · 不属于任何课程 · 点开概览 ↗</div>
+        </div>
+        <div class="card core-card" data-core="ee">
+          <div class="card-title">📄 EE 拓展论文</div>
+          <div class="muted small">IB Core · 不属于任何课程 · 点开概览 ↗</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">最近 DDL（未截止的作业 / 考试）</div>
+          <div id="co-tasks" class="list"></div>
+          <div class="footnote">点作业看详情 · ▲▼ 调顺序 · 左滑移除(可在设置恢复)</div>
+        </div>
+        <div class="card">
+          <div class="card-title">课程列表</div>
+          <div id="co-classes" class="list"></div>
+          <div class="footnote">含各科总评 · ▲▼ 调顺序 · 更多请访问 <a href="#" id="co-link">ManageBac</a> ↗</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 平和邮箱 ================= -->
+    <section class="view" id="view-mail">
+      <div class="row-tools">
+        <button class="ghost" id="ml-unseen" data-mode="1">未读</button>
+        <button class="ghost" id="ml-all" data-mode="0">全部</button>
+        <button class="ghost" id="ml-contacts" title="查看 / 管理联系人">📇 通讯录</button>
+        <span class="flex1"></span>
+        <button class="primary" id="ml-compose">✉ 写邮件</button>
+      </div>
+      <div class="mail-split">
+        <div id="ml-list" class="mail-list card"></div>
+        <div id="ml-read" class="mail-read card"><div class="muted">选择一封邮件查看</div></div>
+      </div>
+    </section>
+
+    <!-- ================= Agent 助手 ================= -->
+    <section class="view" id="view-agent">
+      <div class="agent-split">
+        <aside class="agent-side card">
+          <div class="card-title">权限模式</div>
+          <div class="modebar" id="ag-modebar">
+            <button class="modebtn" data-mode="readonly" title="Agent 只能查询, 写操作全部禁用">🔒 只读</button>
+            <button class="modebtn" data-mode="confirm" title="所有写操作先提案, 你确认后才执行">✋ 操作前确认</button>
+            <button class="modebtn" data-mode="workspace_write" title="工作区内写文档自动执行, 对外操作仍需确认">📝 工作区写入</button>
+            <button class="modebtn" data-mode="full_access" title="所有写操作立即执行, 不再确认">⚡ 完全访问</button>
+          </div>
+          <div id="ag-mode-desc" class="muted small">当前: 操作前确认 — 写操作会先提案, 你确认后才执行</div>
+          <div class="card-title" style="margin-top:14px">会话</div>
+          <button class="primary" id="ag-new-chat" style="width:100%;margin-bottom:8px">＋ 新会话</button>
+          <div id="ag-sessions" class="session-list"><div class="empty">暂无历史</div></div>
+          <div class="card-title" style="margin-top:14px">Workspace</div>
+          <select id="ag-ws-select"></select>
+          <div class="form-row">
+            <input type="text" id="ag-ws-name" placeholder="新 workspace 名" class="flex1">
+            <button class="ghost" id="ag-new-ws">新建</button>
+          </div>
+          <div class="form-row" style="margin-top:4px">
+            <button class="primary" id="ag-pick-ws" style="flex:1">📂 选择文件夹…</button>
+            <button class="ghost" id="ag-open-ws" title="在资源管理器中打开当前 workspace">↗</button>
+          </div>
+          <div class="card-title" style="margin-top:14px">文件</div>
+          <div id="ag-files" class="file-list"><div class="empty">未设置 workspace</div></div>
+        </aside>
+        <div class="agent-main">
+          <div id="ag-proposals" class="list"></div>
+          <div id="ag-chat" class="chat card"><div class="muted">Agent 可以读课表/DDL/成绩/邮件/日程, 起草 Word 作业, 提交作业和发邮件(写操作都会先给你确认)。<br>试试:「最近两周哪些作业还没交?」「帮我起草物理 IA 的 Word 大纲」「帮我安排周五下午 3 点打球」</div></div>
+          <div class="composer card">
+            <div class="form-row" style="margin-bottom:8px">
+              <select id="ag-model-select" style="max-width:230px"></select>
+              <span id="ag-model-now" class="muted small flex1"></span>
+            </div>
+            <textarea id="ag-input" rows="2" placeholder="输入指令, Enter 发送 · Shift+Enter 换行"></textarea>
+            <div class="form-row">
+              <span class="muted small flex1">Enter 发送 · Shift+Enter 换行</span>
+              <button class="ghost" id="ag-reset">清空</button>
+              <button class="primary" id="ag-send">发送</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 设置 ================= -->
+    <section class="view" id="view-settings">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">ManageBac</div>
+          <div class="form-row"><input type="text" id="st-mb-url" placeholder="https://shph.managebac.cn" class="flex1"></div>
+          <div class="form-row"><input type="text" id="st-mb-email" placeholder="邮箱" class="flex1"></div>
+          <div class="form-row"><input type="password" id="st-mb-pass" placeholder="密码(留空=不修改)" class="flex1"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Edupage</div>
+          <div class="form-row"><input type="text" id="st-ep-user" placeholder="账号" class="flex1"></div>
+          <div class="form-row"><input type="text" id="st-ep-sub" placeholder="子域名(如 pingheschool)" class="flex1"></div>
+          <div class="form-row"><input type="password" id="st-ep-pass" placeholder="密码(留空=不修改)" class="flex1"></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">平和邮箱</div>
+          <div class="form-row"><input type="text" id="st-mail-email" placeholder="邮箱" class="flex1"></div>
+          <div class="form-row"><input type="password" id="st-mail-pass" placeholder="网页登录密码(留空=不修改)" class="flex1"></div>
+          <div class="form-row"><input type="text" id="st-mail-authcode" placeholder="客户端授权码(留空=不修改)" class="flex1"></div>
+          <div class="form-row"><input type="text" id="st-mail-imap" placeholder="IMAP 服务器" class="flex1"><input type="text" id="st-mail-smtp" placeholder="SMTP 服务器" class="flex1"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">AI 供应商</div>
+          <div id="st-providers"></div>
+          <div class="form-row">
+            <select id="st-add-preset">
+              <option value="deepseek">DeepSeek</option><option value="kimi">Kimi (Moonshot)</option>
+              <option value="glm">智谱 GLM</option><option value="qwen">通义千问</option>
+              <option value="ollama">Ollama 本地</option><option value="custom">自定义</option>
+            </select>
+            <button class="ghost" id="st-add-provider">＋ 添加提供商</button>
+          </div>
+          <div class="form-row">
+            <label>当前使用</label>
+            <select id="st-active-provider" class="flex1"></select>
+            <select id="st-active-model" class="flex1"></select>
+          </div>
+          <div class="form-row"><label class="chk"><input type="checkbox" id="st-grades-llm"> 允许把成绩发给 AI(默认关闭)</label></div>
+          <button class="primary" id="st-ai-save">保存 AI 供应商</button>
+        </div>
+      </div>
+      <div class="row-tools">
+        <button class="primary" id="st-save">保存设置</button>
+        <button class="ghost" id="st-test">测试连接</button>
+        <span id="st-test-result" class="muted"></span>
+      </div>
+      <div class="card">
+        <div class="card-title">外观定制 <span class="muted small">实时生效 · 全局适用 · 自动保存</span></div>
+        <div class="ap-row">
+          <span class="ap-label">字体缩放</span>
+          <input type="range" id="ap-scale" min="100" max="150" step="any" value="120">
+          <b id="ap-scale-val" style="width:44px;text-align:right">120%</b>
+        </div>
+        <div class="ap-row">
+          <span class="ap-label">主题预设</span>
+          <div class="ap-presets" id="ap-presets"></div>
+        </div>
+        <div class="ap-row">
+          <span class="ap-label">颜色</span>
+          <div class="ap-colors">
+            <label class="ap-color"><input type="color" id="ap-accent"><span>主色</span><input type="text" class="ap-hex" data-role="accent" maxlength="7"></label>
+            <label class="ap-color"><input type="color" id="ap-bg"><span>背景</span><input type="text" class="ap-hex" data-role="bg" maxlength="7"></label>
+            <label class="ap-color"><input type="color" id="ap-panel"><span>面板</span><input type="text" class="ap-hex" data-role="panel" maxlength="7"></label>
+            <label class="ap-color"><input type="color" id="ap-ink"><span>文字</span><input type="text" class="ap-hex" data-role="ink" maxlength="7"></label>
+          </div>
+        </div>
+        <div class="ap-row">
+          <span class="ap-label"></span>
+          <button class="primary" id="ap-apply">✓ 应用外观</button>
+          <button class="ghost" id="ap-reset">↺ 恢复默认</button>
+          <span class="muted small">主色会自动派生侧栏 / 按钮 / 链接 / 焦点环的整套同系色</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">我的选课</div>
+        <div id="st-subjects" class="chip-wrap"></div>
+        <div class="form-row" style="margin-top:10px">
+          <button class="ghost" id="st-repick">✏️ 修改选课(重新从 Edupage 读取)</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">已移除的作业</div>
+        <div id="st-dismissed" class="list"><div class="empty">加载中…</div></div>
+        <div class="muted small">在首页/课程页左滑移除的作业会出现在这里, 点"恢复"即可找回。</div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= 首次启动向导 ================= -->
+<div id="wizard" class="overlay hidden">
+  <div class="wizard card">
+    <div class="wizard-head"><b id="wz-title">欢迎使用 Hello Pinghe! Launcher</b><span id="wz-step" class="muted">1 / 4</span></div>
+
+    <div class="wz-step" id="wz-1">
+      <p>1/5 · 登录 <b>Edupage</b>(学校子域名会自动识别, 一般不用改)</p>
+      <div class="form-row"><input type="text" id="wz-ep-user" placeholder="账号或邮箱" class="flex1"></div>
+      <div class="form-row"><input type="password" id="wz-ep-pass" placeholder="密码" class="flex1"><input type="text" id="wz-ep-sub" placeholder="子域名" value="pingheschool" style="width:150px"></div>
+      <button class="primary" id="wz-ep-go">登录 Edupage</button>
+      <button class="ghost" id="wz-ep-skip">跳过</button>
+      <span id="wz-ep-msg" class="muted"></span>
+    </div>
+
+    <div class="wz-step hidden" id="wz-2">
+      <p>2/5 · 登录 <b>ManageBac</b>(本校地址已预填)</p>
+      <div class="form-row"><input type="text" id="wz-mb-url" value="shph.managebac.cn" class="flex1"></div>
+      <div class="form-row"><input type="text" id="wz-mb-email" placeholder="邮箱" class="flex1"></div>
+      <div class="form-row"><input type="password" id="wz-mb-pass" placeholder="密码" class="flex1"></div>
+      <button class="primary" id="wz-mb-go">登录 ManageBac</button>
+      <button class="ghost" id="wz-mb-skip">跳过</button>
+      <span id="wz-mb-msg" class="muted"></span>
+    </div>
+
+    <div class="wz-step hidden" id="wz-3">
+      <p>3/5 · <b>选择你上的课</b>(同一科目多个老师分组时, 再点选具体老师)</p>
+      <div class="form-row"><input type="text" id="wz-sub-filter" placeholder="筛选科目…" class="flex1"></div>
+      <div id="wz-subjects" class="subject-list"></div>
+      <button class="primary" id="wz-sub-go">保存选课</button>
+      <button class="ghost" id="wz-sub-skip">跳过</button>
+      <span id="wz-sub-msg" class="muted"></span>
+    </div>
+
+    <div class="wz-step hidden" id="wz-4">
+      <p>4/5 · 配置 <b>平和邮箱</b>(网易企业邮 · 网页入口 mail.shphschool.com)</p>
+      <div class="form-row"><input type="text" id="wz-mail-email" placeholder="邮箱(如 name25@shphschool.com)" class="flex1"></div>
+      <div class="form-row"><input type="password" id="wz-mail-pass" placeholder="网页登录密码" class="flex1"></div>
+      <div class="form-row"><input type="text" id="wz-mail-authcode" placeholder="客户端授权码(不是网页登录密码)" class="flex1"></div>
+      <div class="form-row">
+        <input type="text" id="wz-mail-imap" value="imap.qiye.163.com" class="flex1">
+        <input type="text" id="wz-mail-smtp" value="smtp.qiye.163.com" class="flex1">
+      </div>
+      <p class="muted small">协议: IMAP(993) / SMTP(994)。⚠ 网易企业邮需要<b>客户端授权码</b>:
+        登录 mail.shphschool.com → 设置 → 客户端设置 → 开启 IMAP/SMTP 并生成授权码。
+        上面需同时填写<b>网页登录密码</b>和<b>客户端授权码</b>。</p>
+      <button class="primary" id="wz-mail-go">保存并验证</button>
+      <button class="ghost" id="wz-mail-skip">先跳过(之后在设置里配)</button>
+      <span id="wz-mail-msg" class="muted"></span>
+    </div>
+
+    <div class="wz-step hidden" id="wz-5">
+      <p>5/5 · 配置 <b>AI</b>(用于 Agent 助手)</p>
+      <div id="wz-ai-env" class="muted small">检测硬件中…</div>
+      <div class="form-row">
+        <select id="wz-ai-preset">
+          <option value="ollama">Ollama 本地模型(免费, 按配置推荐)</option>
+          <option value="deepseek">DeepSeek API</option>
+          <option value="kimi">Kimi (Moonshot) API</option>
+          <option value="glm">智谱 GLM API</option>
+          <option value="qwen">通义千问 API</option>
+          <option value="custom">自定义 API</option>
+        </select>
+        <input type="text" id="wz-ai-key" placeholder="API Key(本地模型留空)" class="flex1">
+      </div>
+      <div class="form-row"><input type="text" id="wz-ai-base" placeholder="base_url(可留空用预设默认)" class="flex1"><input type="text" id="wz-ai-model" placeholder="模型名(可留空用默认)" class="flex1"></div>
+      <button class="primary" id="wz-ai-go">保存 AI 配置</button>
+      <button class="ghost" id="wz-ai-skip">跳过</button>
+      <span id="wz-ai-msg" class="muted"></span>
+    </div>
+
+    <div class="wizard-foot">
+      <button class="ghost" id="wz-skip">跳过向导</button>
+      <button class="primary hidden" id="wz-finish">进入 Hello Pinghe! Launcher</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 启动连接页(每次打开, 向导完成后显示) ================= -->
+<div id="splash" class="overlay hidden">
+  <div class="wizard card" style="width:480px">
+    <div class="wizard-head"><b>正在连接你的账号</b><span class="muted small">完成后自动进入</span></div>
+    <div class="splash-row" id="sp-row-edupage">
+      <span class="sp-name">Edupage(课表)</span><span class="sp-status muted">等待中…</span>
+      <button class="ghost" data-skip="edupage">跳过</button>
+    </div>
+    <div class="splash-row" id="sp-row-managebac">
+      <span class="sp-name">ManageBac(课程/DDL)</span><span class="sp-status muted">等待中…</span>
+      <button class="ghost" data-skip="managebac">跳过</button>
+    </div>
+    <div class="splash-row" id="sp-row-mail">
+      <span class="sp-name">平和邮箱</span><span class="sp-status muted">等待中…</span>
+      <button class="ghost" data-skip="mail">跳过</button>
+    </div>
+    <div class="wizard-foot">
+      <span class="muted small">某项失败不影响进入, 对应页面会再提示</span>
+      <button class="primary hidden" id="sp-enter">进入软件</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 选课修改弹窗 ================= -->
+<div id="subject-modal" class="overlay hidden">
+  <div class="wizard card">
+    <div class="wizard-head"><b>修改选课</b><span id="sm-msg" class="muted"></span></div>
+    <input type="text" id="sm-filter" class="form-row" placeholder="筛选科目…">
+    <div id="sm-subjects" class="subject-list"></div>
+    <div class="wizard-foot">
+      <button class="ghost" id="sm-cancel">取消</button>
+      <button class="primary" id="sm-save">保存选课</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 写邮件弹卡 ================= -->
+<div id="ml-modal" class="overlay hidden">
+  <div class="mail-card">
+    <div class="wizard-head">
+      <b>✉ 写邮件</b>
+      <button class="ghost" id="ml-cancel">✕ 关闭</button>
+    </div>
+    <div class="form-row" style="position:relative">
+      <input type="text" id="ml-to" placeholder="收件人 (输入名字自动匹配通讯录)" class="flex1" autocomplete="off">
+      <div id="ml-ac" class="ac-list hidden"></div>
+    </div>
+    <div class="form-row"><input type="text" id="ml-subject" placeholder="主题" class="flex1"></div>
+    <textarea id="ml-body" placeholder="正文…"></textarea>
+    <div class="form-row" style="justify-content:flex-end;margin-top:10px">
+      <span id="ml-msg" class="muted small flex1"></span>
+      <button class="primary" id="ml-send">发送</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 课表课卡弹卡 + 右键菜单 ================= -->
+<div id="tt-modal" class="overlay hidden">
+  <div class="mail-card tt-card">
+    <div class="wizard-head"><b id="ttm-title">课程</b></div>
+    <div class="ttm-meta">
+      <span class="badge" id="ttm-group"></span>
+      <span id="ttm-label" class="muted"></span>
+    </div>
+    <div class="item"><span class="dim" style="width:44px">老师</span><span class="grow" id="ttm-teacher"></span></div>
+    <div class="item"><span class="dim" style="width:44px">教室</span><span class="grow" id="ttm-room"></span></div>
+    <div class="muted small" style="margin:8px 0 4px">上课时间(本周)</div>
+    <div id="ttm-times" class="list" style="max-height:200px;overflow:auto"></div>
+    <div class="wizard-foot">
+      <button class="danger" id="ttm-del">取消选课</button>
+      <button class="ghost" id="ttm-close">退出</button>
+    </div>
+  </div>
+</div>
+<div id="tt-menu" class="tt-menu hidden">
+  <button id="tt-menu-add">📅 添加到日程</button>
+  <button id="tt-menu-hl">★ 高亮这节课</button>
+  <button id="tt-menu-gray">变灰(弱化显示)</button>
+</div>
+
+<!-- ================= 课程详情弹卡(仿 ManageBac: 作业/单元/文件/日历) ================= -->
+<div id="cd-modal" class="overlay hidden">
+  <div class="mail-card cd-card">
+    <div class="wizard-head">
+      <b id="cd-title">课程</b>
+      <span class="cd-head-right">
+        <span class="badge" id="cd-grade"></span>
+        <button class="ghost" id="cd-open-mb">在 ManageBac 打开 ↗</button>
+        <button class="ghost" id="cd-close">✕</button>
+      </span>
+    </div>
+    <div class="tabbar">
+      <button class="tabbtn on" data-tab="tasks">📝 作业</button>
+      <button class="tabbtn" data-tab="units">📚 单元</button>
+      <button class="tabbtn" data-tab="files">📁 文件</button>
+      <button class="tabbtn" data-tab="events">📅 日历</button>
+    </div>
+    <div id="cd-body" class="cd-body list"><div class="empty">加载中…</div></div>
+  </div>
+</div>
+
+<!-- ================= 作业/考试详情弹卡 ================= -->
+<div id="td-modal" class="overlay hidden">
+  <div class="mail-card tt-card">
+    <div class="wizard-head">
+      <b id="td-title">作业</b>
+      <button class="ghost" id="td-close">✕</button>
+    </div>
+    <div class="ttm-meta">
+      <span class="badge" id="td-category"></span>
+      <span class="badge" id="td-kind"></span>
+      <span class="badge" id="td-status"></span>
+    </div>
+    <div class="item"><span class="dim" style="width:52px">课程</span><span class="grow" id="td-course"></span></div>
+    <div class="item"><span class="dim" style="width:52px">截止</span><span class="grow" id="td-due"></span></div>
+    <div class="item hidden" id="td-score-row"><span class="dim" style="width:52px">分数</span><span class="grow" id="td-score"></span></div>
+    <div class="item hidden" id="td-dropbox-row"><span class="dim" style="width:52px">提交</span><span class="grow" id="td-dropbox"></span></div>
+    <div id="td-desc" class="td-desc"></div>
+    <div class="wizard-foot">
+      <button class="ghost" id="td-open-mb">在 ManageBac 打开 ↗</button>
+      <span class="flex1"></span>
+      <button class="primary" id="td-submit">📤 提交作业</button>
+      <button class="ghost" id="td-close2">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CAS / EE 弹卡 ================= -->
+<div id="core-modal" class="overlay hidden">
+  <div class="mail-card cd-card">
+    <div class="wizard-head">
+      <b id="core-title">IB Core</b>
+      <button class="ghost" id="core-close">✕</button>
+    </div>
+    <div id="core-body" class="cd-body list"><div class="empty">加载中…</div></div>
+    <div class="wizard-foot">
+      <button class="ghost" id="core-open-mb">在 ManageBac 打开 ↗</button>
+      <button class="ghost" id="core-close2">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Agent 权限模式双重确认弹卡 ================= -->
+<div id="mode-modal" class="overlay hidden">
+  <div class="mail-card tt-card">
+    <div class="wizard-head">
+      <b id="mode-title">⚠️ 权限变更确认</b>
+      <button class="ghost" id="mode-close">✕</button>
+    </div>
+    <div id="mode-warn" class="mode-warn"></div>
+    <div class="wizard-foot">
+      <button class="ghost" id="mode-cancel">取消</button>
+      <button class="danger" id="mode-next">我已了解风险，继续</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 通讯录: 查看 / 增删改联系人 ================= -->
+<div id="ct-modal" class="overlay hidden">
+  <div class="mail-card ct-card">
+    <div class="wizard-head">
+      <b>📇 通讯录</b>
+      <button class="ghost" id="ct-close">✕ 关闭</button>
+    </div>
+    <input type="text" id="ct-search" placeholder="🔍 搜索姓名或邮箱…" style="margin:6px 0">
+    <div id="ct-list" class="ct-list"></div>
+    <div class="form-row" style="margin-top:10px">
+      <input type="text" id="ct-name" placeholder="姓名" style="width:190px">
+      <input type="text" id="ct-email" placeholder="邮箱地址" class="flex1">
+      <button class="primary" id="ct-add">＋ 添加</button>
+    </div>
+    <div class="form-row" style="justify-content:flex-end;margin-top:6px">
+      <span id="ct-msg" class="muted small flex1"></span>
+      <span id="ct-count" class="muted small"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 日程弹卡: 点击某天显示当天安排 ================= -->
+<div id="sch-modal" class="overlay hidden">
+  <div class="sch-card">
+    <div class="wizard-head">
+      <b id="schm-title"></b>
+      <button class="ghost" id="schm-close">✕ 关闭</button>
+    </div>
+    <div id="schm-list" class="list"></div>
+    <div class="form-row" style="margin-top:12px">
+      <input type="time" id="schm-time">
+      <input type="text" id="schm-title-in" placeholder="事项" class="flex1">
+      <input type="text" id="schm-note" placeholder="备注(可选)" class="flex1">
+      <button class="primary" id="schm-add">添加</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+<script src="app.js"></script>
+</body>
+</html>

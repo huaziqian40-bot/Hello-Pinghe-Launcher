@@ -1,0 +1,22 @@
+# æ„å»ºäº§ç‰©(å¯éšæ—¶é‡å»º)
+build/
+dist/
+*.msi
+*.wixobj
+*.wixpdb
+# Python
+__pycache__/
+*.pyc
+# å¼€å‘ä¸´æ—¶æ–‡ä»¶
+_perf_*.py
+_splash_*.py
+_ui_*.py
+_probe_*.py
+*.log
+msi_extract
+
+# ³ÉÆ·¶ş½øÖÆ×ß GitHub Releases, ²»½ø²Ö¿â
+HelloPingheLauncher.exe
+/deliver/
+tools/wix314-binaries.zip
+/tools/
